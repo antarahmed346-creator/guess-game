@@ -1,0 +1,2674 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>لعبة التخمين 🎮</title>
+    <style>
+      :root {
+        --primary: #6c5ce7;
+        --secondary: #00cec9;
+        --success: #00b894;
+        --danger: #d63031;
+        --warning: #fdcb6e;
+        --dark: #2d3436;
+        --light: #f5f6fa;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        direction: rtl;
+      }
+
+      .screen {
+        display: none;
+        min-height: 100vh;
+        padding: 20px;
+        animation: fadeIn 0.5s ease;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .screen.active {
+        display: flex;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* الأزرار */
+      .btn {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 50px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+      }
+
+      .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+      }
+      .btn-success {
+        background: var(--success);
+        color: white;
+      }
+      .btn-danger {
+        background: var(--danger);
+        color: white;
+      }
+      .btn-warning {
+        background: var(--warning);
+        color: var(--dark);
+      }
+      .btn-secondary {
+        background: #636e72;
+        color: white;
+      }
+      .btn-large {
+        padding: 18px 50px;
+        font-size: 20px;
+      }
+
+      /* شاشة البداية */
+      #home-screen {
+        justify-content: center;
+        text-align: center;
+      }
+
+      .game-logo {
+        font-size: 80px;
+        margin-bottom: 20px;
+        animation: bounce 2s infinite;
+        display: block;
+      }
+
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-15px);
+        }
+      }
+
+      .game-title {
+        font-size: 48px;
+        color: white;
+        font-weight: 900;
+        text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+        margin-bottom: 10px;
+      }
+
+      .game-subtitle {
+        font-size: 20px;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 40px;
+      }
+
+      .rules-card {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        padding: 25px;
+        color: white;
+        width: 100%;
+        max-width: 500px;
+        margin-bottom: 30px;
+        text-align: right;
+      }
+
+      .rules-card h3 {
+        font-size: 20px;
+        margin-bottom: 15px;
+        color: var(--warning);
+      }
+      .rules-card ul {
+        list-style: none;
+      }
+      .rules-card li {
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 15px;
+      }
+      .rules-card li::before {
+        content: "✅ ";
+      }
+
+      /* شاشة إعداد الفرق */
+      #setup-screen {
+        padding-top: 40px;
+      }
+
+      .screen-title {
+        font-size: 32px;
+        color: white;
+        font-weight: 800;
+        margin-bottom: 25px;
+        text-align: center;
+      }
+
+      .card {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 600px;
+        margin-bottom: 20px;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .form-group label {
+        display: block;
+        color: #2d3436;
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 12px 18px;
+        border: 2px solid #ddd;
+        border-radius: 12px;
+        font-size: 16px;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        transition: all 0.3s;
+        text-align: right;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: var(--secondary);
+        box-shadow: 0 0 0 4px rgba(0, 206, 201, 0.2);
+      }
+
+      .teams-list {
+        width: 100%;
+        max-width: 600px;
+      }
+
+      .team-item {
+        background: white;
+        border-radius: 15px;
+        padding: 15px 20px;
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        animation: slideIn 0.3s ease;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .team-item-info h3 {
+        font-size: 18px;
+      }
+      .team-item-info p {
+        color: #636e72;
+        font-size: 13px;
+        margin-top: 3px;
+      }
+
+      .delete-btn {
+        background: none;
+        border: none;
+        color: var(--danger);
+        font-size: 22px;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 50%;
+        transition: all 0.2s;
+      }
+
+      .delete-btn:hover {
+        background: #fff5f5;
+        transform: scale(1.2);
+      }
+
+      /* شاشة اللعب */
+      #game-screen {
+        background: var(--light);
+        padding: 15px;
+      }
+
+      .game-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: white;
+        padding: 15px 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        width: 100%;
+        max-width: 900px;
+        margin-bottom: 15px;
+      }
+
+      .current-team-info h2 {
+        font-size: 20px;
+        color: var(--dark);
+      }
+      .current-team-info p {
+        font-size: 14px;
+        color: #636e72;
+        margin-top: 3px;
+      }
+
+      .timer-display {
+        background: var(--dark);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 12px;
+        font-size: 28px;
+        font-weight: 900;
+        min-width: 100px;
+        text-align: center;
+        transition: background 0.3s;
+      }
+
+      .timer-display.warning {
+        background: var(--warning);
+        color: var(--dark);
+      }
+      .timer-display.danger {
+        background: var(--danger);
+        animation: pulse 0.5s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      .scoreboard {
+        display: flex;
+        gap: 10px;
+        width: 100%;
+        max-width: 900px;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+      }
+
+      .score-badge {
+        background: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-weight: bold;
+        font-size: 15px;
+        color: var(--dark);
+        border: 3px solid transparent;
+        transition: all 0.3s;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+      }
+
+      .score-badge.active {
+        border-color: var(--primary);
+        color: var(--primary);
+        transform: scale(1.1);
+      }
+
+      .game-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        width: 100%;
+        max-width: 900px;
+        flex: 1;
+      }
+
+      @media (max-width: 768px) {
+        .game-content {
+          grid-template-columns: 1fr;
+        }
+        .game-title {
+          font-size: 32px;
+        }
+      }
+
+      /* منطقة الصورة - الأهم */
+      .image-box {
+        background: white;
+        border-radius: 20px;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        min-height: 350px;
+        overflow: hidden;
+      }
+
+      .category-tag {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: var(--primary);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: bold;
+        z-index: 10;
+      }
+
+      /* تصميم الصورة المحسّن */
+      .image-wrapper {
+        width: 100%;
+        height: 280px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #f8f9fa;
+        position: relative;
+      }
+
+      .game-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 12px;
+        transition: opacity 0.5s ease;
+      }
+
+      .image-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea22, #764ba222);
+        border-radius: 12px;
+        color: var(--primary);
+      }
+
+      .image-placeholder .category-icon {
+        font-size: 80px;
+        margin-bottom: 15px;
+      }
+
+      .image-placeholder p {
+        font-size: 18px;
+        font-weight: bold;
+        color: var(--dark);
+      }
+
+      .letter-count {
+        margin-top: 10px;
+        color: #636e72;
+        font-size: 14px;
+        background: var(--light);
+        padding: 5px 15px;
+        border-radius: 10px;
+      }
+
+      /* منطقة الإجابة */
+      .answer-box {
+        background: white;
+        border-radius: 20px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      }
+
+      .answer-box h3 {
+        color: var(--dark);
+        font-size: 18px;
+        text-align: center;
+      }
+
+      .answer-input {
+        width: 100%;
+        padding: 15px 20px;
+        border: 2px solid #ddd;
+        border-radius: 12px;
+        font-size: 18px;
+        text-align: center;
+        transition: all 0.3s;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+      }
+
+      .answer-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.2);
+      }
+
+      .answer-input.correct {
+        border-color: var(--success);
+        background: #e8fff4;
+        animation: correctAnim 0.5s ease;
+      }
+
+      .answer-input.wrong {
+        border-color: var(--danger);
+        background: #fff5f5;
+        animation: wrongAnim 0.5s ease;
+      }
+
+      @keyframes correctAnim {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.03);
+        }
+      }
+
+      @keyframes wrongAnim {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-8px);
+        }
+        75% {
+          transform: translateX(8px);
+        }
+      }
+
+      .hint-section {
+        background: var(--light);
+        border-radius: 12px;
+        padding: 12px;
+      }
+
+      .hint-section h4 {
+        color: var(--dark);
+        margin-bottom: 10px;
+        font-size: 13px;
+        text-align: center;
+      }
+
+      .hint-dots {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .hint-dot {
+        min-width: 32px;
+        height: 32px;
+        padding: 0 5px;
+        border-radius: 8px;
+        background: white;
+        border: 2px solid var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: bold;
+        color: var(--primary);
+        transition: all 0.5s;
+        cursor: default;
+      }
+
+      .hint-dot.space {
+        background: transparent;
+        border: none;
+        width: 15px;
+        min-width: 15px;
+      }
+
+      .hint-dot.revealed {
+        background: var(--primary);
+        color: white;
+      }
+
+      /* شاشة النتائج */
+      #results-screen {
+        justify-content: center;
+        text-align: center;
+      }
+
+      .winner-trophy {
+        font-size: 100px;
+        display: block;
+        animation: trophyAnim 1s ease infinite;
+      }
+
+      @keyframes trophyAnim {
+        0%,
+        100% {
+          transform: rotate(-10deg) scale(1);
+        }
+        50% {
+          transform: rotate(10deg) scale(1.1);
+        }
+      }
+
+      .winner-text {
+        color: white;
+        margin-bottom: 30px;
+      }
+      .winner-text h1 {
+        font-size: 40px;
+        font-weight: 900;
+      }
+      .winner-text h2 {
+        font-size: 28px;
+        color: var(--warning);
+        margin: 10px 0;
+      }
+
+      .final-scoreboard {
+        width: 100%;
+        max-width: 500px;
+        margin-bottom: 30px;
+      }
+
+      .final-row {
+        display: flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 15px;
+        padding: 15px 20px;
+        margin-bottom: 10px;
+        color: white;
+        gap: 15px;
+      }
+
+      .final-row.winner {
+        background: rgba(253, 203, 110, 0.3);
+        border: 2px solid var(--warning);
+      }
+
+      .rank-num {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        flex-shrink: 0;
+      }
+
+      .final-row.winner .rank-num {
+        background: var(--warning);
+        color: var(--dark);
+      }
+
+      /* التوستر */
+      .toast {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 15px 30px;
+        border-radius: 15px;
+        color: white;
+        font-size: 17px;
+        font-weight: bold;
+        z-index: 9999;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        animation: toastIn 0.3s ease;
+        text-align: center;
+        max-width: 90%;
+      }
+
+      .toast.success {
+        background: var(--success);
+      }
+      .toast.error {
+        background: var(--danger);
+      }
+      .toast.info {
+        background: var(--primary);
+      }
+      .toast.warning {
+        background: var(--warning);
+        color: var(--dark);
+      }
+
+      @keyframes toastIn {
+        from {
+          opacity: 0;
+          top: -20px;
+        }
+        to {
+          opacity: 1;
+          top: 20px;
+        }
+      }
+
+      /* النافذة المنبثقة */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .modal-overlay.show {
+        display: flex;
+      }
+
+      .modal {
+        background: white;
+        border-radius: 25px;
+        padding: 35px;
+        max-width: 450px;
+        width: 90%;
+        text-align: center;
+        animation: modalIn 0.3s ease;
+      }
+
+      @keyframes modalIn {
+        from {
+          opacity: 0;
+          transform: scale(0.7);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      .modal h2 {
+        font-size: 26px;
+        margin-bottom: 15px;
+        color: var(--dark);
+      }
+      .modal p {
+        color: #636e72;
+        margin-bottom: 25px;
+        font-size: 16px;
+        line-height: 1.6;
+        white-space: pre-line;
+      }
+
+      .modal-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      /* شريط التقدم */
+      .progress-bar {
+        width: 100%;
+        max-width: 900px;
+        height: 8px;
+        background: #ddd;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 15px;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        border-radius: 4px;
+        transition: width 1s linear;
+      }
+
+      /* الكونفيتي */
+      .confetti-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 9998;
+      }
+
+      .confetti-piece {
+        position: absolute;
+        top: -10px;
+        animation: fall linear forwards;
+      }
+
+      @keyframes fall {
+        to {
+          transform: translateY(110vh) rotate(720deg);
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- شاشة البداية -->
+    <div id="home-screen" class="screen active">
+      <span class="game-logo">🎮</span>
+      <h1 class="game-title">لعبة التخمين</h1>
+      <p class="game-subtitle">مستوحاة من تحدي مسلسل اللعبة 5 🎬</p>
+
+      <div class="rules-card">
+        <h3>📋 قواعد اللعبة</h3>
+        <ul>
+          <li>كوّن فريقين أو أكثر (2-8 لاعبين لكل فريق)</li>
+          <li>تظهر صورة أو تلميح للفريق</li>
+          <li>الأعضاء يعطون تلميحات للمخمن</li>
+          <li>وقت كل جولة: دقيقة ونصف ⏰</li>
+          <li>الإجابة الصحيحة = نقطة 🌟</li>
+          <li>أول فريق يصل لـ 10 نقاط يفوز 🏆</li>
+        </ul>
+      </div>
+
+      <button
+        class="btn btn-warning btn-large"
+        onclick="showScreen('setup-screen')"
+      >
+        🚀 ابدأ اللعبة
+      </button>
+    </div>
+
+    <!-- شاشة إعداد الفرق -->
+    <div id="setup-screen" class="screen">
+      <h2 class="screen-title">⚙️ إعداد الفرق</h2>
+
+      <div class="card">
+        <div class="form-group">
+          <label>🏷️ اسم الفريق:</label>
+          <input
+            type="text"
+            id="team-name-input"
+            placeholder="مثال: النسور"
+            maxlength="20"
+            onkeypress="if (event.key === 'Enter') addTeam();"
+          />
+        </div>
+        <div class="form-group">
+          <label>👥 عدد اللاعبين:</label>
+          <select id="team-size-input">
+            <option value="2">2 لاعبين</option>
+            <option value="3">3 لاعبين</option>
+            <option value="4">4 لاعبين</option>
+            <option value="5">5 لاعبين</option>
+            <option value="6">6 لاعبين</option>
+            <option value="7">7 لاعبين</option>
+            <option value="8">8 لاعبين</option>
+          </select>
+        </div>
+        <button
+          class="btn btn-success"
+          style="width: 100%; margin-top: 5px"
+          onclick="addTeam()"
+        >
+          ➕ إضافة فريق
+        </button>
+      </div>
+
+      <div class="teams-list" id="teams-list"></div>
+
+      <div
+        style="
+          display: flex;
+          gap: 15px;
+          width: 100%;
+          max-width: 600px;
+          margin-top: 10px;
+        "
+      >
+        <button
+          class="btn btn-secondary"
+          onclick="showScreen('home-screen')"
+          style="flex: 1"
+        >
+          ← رجوع
+        </button>
+        <button
+          class="btn btn-primary"
+          id="start-btn"
+          onclick="startGame()"
+          disabled
+          style="flex: 2"
+        >
+          🎮 ابدأ (<span id="team-count">0</span> فرق)
+        </button>
+      </div>
+      <p
+        style="
+          color: rgba(255, 255, 255, 0.7);
+          margin-top: 15px;
+          font-size: 13px;
+          text-align: center;
+        "
+      >
+        * يجب إضافة فريقين على الأقل
+      </p>
+    </div>
+
+    <!-- شاشة اللعب -->
+    <div id="game-screen" class="screen">
+      <div class="game-header">
+        <div class="current-team-info">
+          <h2>🎯 <span id="current-team-name">-</span></h2>
+          <p>
+            النقاط: <strong id="current-score">0</strong>/10 | جولة:
+            <span id="round-num">1</span>
+          </p>
+        </div>
+        <div class="timer-display" id="timer">1:30</div>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 100%"></div>
+      </div>
+
+      <div class="scoreboard" id="scoreboard"></div>
+
+      <div class="game-content">
+        <!-- منطقة الصورة -->
+        <div class="image-box">
+          <div class="category-tag" id="img-category">-</div>
+          <div class="image-wrapper">
+            <img
+              id="game-image"
+              class="game-image"
+              src=""
+              alt=""
+              style="display: none"
+              onerror="handleImageError()"
+              onload="handleImageLoad()"
+            />
+            <div class="image-placeholder" id="img-placeholder">
+              <div class="category-icon" id="category-icon">🖼️</div>
+              <p id="placeholder-text">جاري التحميل...</p>
+            </div>
+          </div>
+          <div class="letter-count">
+            عدد الحروف: <strong id="letter-count">0</strong>
+          </div>
+        </div>
+
+        <!-- منطقة الإجابة -->
+        <div class="answer-box">
+          <h3>✍️ خمّن الإجابة</h3>
+
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              color: #636e72;
+              font-size: 14px;
+              padding: 0 5px;
+            "
+          >
+            <span>المخمن: <strong id="guesser-name">-</strong></span>
+            <span id="time-text">1:30</span>
+          </div>
+
+          <div class="hint-section">
+            <h4>💡 تلميح الحروف</h4>
+            <div class="hint-dots" id="hint-dots"></div>
+          </div>
+
+          <input
+            type="text"
+            class="answer-input"
+            id="answer-input"
+            placeholder="اكتب إجابتك هنا..."
+            autocomplete="off"
+            onkeypress="if (event.key === 'Enter') checkAnswer();"
+          />
+
+          <div style="display: flex; gap: 10px">
+            <button
+              class="btn btn-success"
+              style="flex: 2"
+              onclick="checkAnswer()"
+            >
+              ✅ تحقق
+            </button>
+            <button
+              class="btn btn-danger"
+              style="flex: 1"
+              onclick="skipQuestion()"
+            >
+              ⏭️ تخطي
+            </button>
+          </div>
+
+          <button
+            class="btn btn-secondary"
+            style="width: 100%; font-size: 13px; padding: 10px"
+            onclick="revealLetter()"
+          >
+            🔍 كشف حرف تلميح
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- شاشة النتائج -->
+    <div id="results-screen" class="screen">
+      <div class="confetti-container" id="confetti"></div>
+
+      <div class="winner-text">
+        <span class="winner-trophy">🏆</span>
+        <h1>انتهت اللعبة!</h1>
+        <h2 id="winner-name">-</h2>
+        <p style="font-size: 20px; color: rgba(255, 255, 255, 0.9)">
+          🌟 <span id="winner-score">0</span> نقطة
+        </p>
+      </div>
+
+      <div class="final-scoreboard" id="final-scoreboard"></div>
+
+      <div
+        style="
+          display: flex;
+          gap: 15px;
+          flex-wrap: wrap;
+          justify-content: center;
+        "
+      >
+        <button class="btn btn-warning btn-large" onclick="restartGame()">
+          🔄 العب مجدداً
+        </button>
+        <button class="btn btn-primary btn-large" onclick="newGame()">
+          🏠 لعبة جديدة
+        </button>
+      </div>
+    </div>
+
+    <!-- النافذة المنبثقة -->
+    <div class="modal-overlay" id="modal-overlay">
+      <div class="modal">
+        <div id="modal-icon" style="font-size: 50px; margin-bottom: 15px"></div>
+        <h2 id="modal-title"></h2>
+        <p id="modal-msg"></p>
+        <div class="modal-buttons" id="modal-btns"></div>
+      </div>
+    </div>
+
+    <script>
+      // ========== قاعدة بيانات الأسئلة (بدون صور خارجية) ==========
+      // استخدام نظام الأيقونات والألوان بدلاً من الصور المعطلة
+      const QUESTIONS = [
+        // مشاهير مصريين - ممثلين
+        {
+          id: 1,
+          category: "ممثل مصري",
+          answer: "عادل إمام",
+          alt: ["عادل امام", "الزعيم"],
+          icon: "🎭",
+          color: "#e17055",
+          hint: "ممثل كوميدي مصري شهير لقبه الزعيم",
+        },
+        {
+          id: 2,
+          category: "ممثل مصري",
+          answer: "أحمد حلمي",
+          alt: ["احمد حلمي"],
+          icon: "🎭",
+          color: "#6c5ce7",
+          hint: "ممثل كوميدي مصري متزوج من منى زكي",
+        },
+        {
+          id: 3,
+          category: "ممثل مصري",
+          answer: "كريم عبد العزيز",
+          alt: ["كريم"],
+          icon: "🎭",
+          color: "#00b894",
+          hint: "ممثل مصري يلقب بـ محبوب الجماهير",
+        },
+        {
+          id: 4,
+          category: "ممثل مصري",
+          answer: "محمد هنيدي",
+          alt: ["هنيدي"],
+          icon: "🎭",
+          color: "#fdcb6e",
+          hint: "ممثل كوميدي مصري اشتهر بفيلم صعيدي في الجامعة",
+        },
+        {
+          id: 5,
+          category: "ممثل مصري",
+          answer: "أحمد السقا",
+          alt: ["السقا"],
+          icon: "🎭",
+          color: "#d63031",
+          hint: "ممثل مصري اشتهر بأدوار الأكشن",
+        },
+        {
+          id: 6,
+          category: "ممثل مصري",
+          answer: "منى زكي",
+          alt: ["مونا زكي"],
+          icon: "🎭",
+          color: "#e84393",
+          hint: "ممثلة مصرية متزوجة من أحمد حلمي",
+        },
+        {
+          id: 7,
+          category: "ممثل مصري",
+          answer: "يسرا",
+          alt: [],
+          icon: "🎭",
+          color: "#a29bfe",
+          hint: "ممثلة مصرية كبيرة لقبها سيدة الشاشة",
+        },
+        {
+          id: 8,
+          category: "ممثل مصري",
+          answer: "محمد رمضان",
+          alt: [],
+          icon: "🎭",
+          color: "#00cec9",
+          hint: "ممثل مصري اشتهر بمسلسل نسر الصعيد",
+        },
+        {
+          id: 9,
+          category: "ممثل مصري",
+          answer: "أحمد عز",
+          alt: ["احمد عز"],
+          icon: "🎭",
+          color: "#0984e3",
+          hint: "ممثل مصري اشتهر بأفلام الأكشن",
+        },
+        {
+          id: 10,
+          category: "ممثل مصري",
+          answer: "ياسمين صبري",
+          alt: [],
+          icon: "🎭",
+          color: "#e17055",
+          hint: "ممثلة مصرية تعتبر من أجمل نساء العالم",
+        },
+        {
+          id: 11,
+          category: "ممثل مصري",
+          answer: "أمير كرارة",
+          alt: ["امير كرارة"],
+          icon: "🎭",
+          color: "#6c5ce7",
+          hint: "ممثل مصري اشتهر بمسلسل نسر الصعيد",
+        },
+        {
+          id: 12,
+          category: "ممثل مصري",
+          answer: "نيللي كريم",
+          alt: ["نيلي كريم"],
+          icon: "🎭",
+          color: "#fd79a8",
+          hint: "ممثلة مصرية حصلت على جائزة أحسن ممثلة",
+        },
+        {
+          id: 13,
+          category: "ممثل مصري",
+          answer: "آسر ياسين",
+          alt: ["اسر ياسين"],
+          icon: "🎭",
+          color: "#55efc4",
+          hint: "ممثل مصري اشتهر بأدوار رومانسية",
+        },
+        {
+          id: 14,
+          category: "ممثل مصري",
+          answer: "فاتن حمامة",
+          alt: [],
+          icon: "🎭",
+          color: "#fdcb6e",
+          hint: "أول سيدة في السينما المصرية",
+        },
+        {
+          id: 15,
+          category: "ممثل مصري",
+          answer: "نور الشريف",
+          alt: [],
+          icon: "🎭",
+          color: "#d63031",
+          hint: "ممثل مصري كبير توفي عام 2015",
+        },
+
+        // مغنيين مصريين
+        {
+          id: 16,
+          category: "مغني مصري",
+          answer: "عمرو دياب",
+          alt: ["الهضبة"],
+          icon: "🎤",
+          color: "#6c5ce7",
+          hint: "مغني مصري لقبه الهضبة حصل على جوائز عالمية",
+        },
+        {
+          id: 17,
+          category: "مغني مصري",
+          answer: "محمد منير",
+          alt: ["الكينج"],
+          icon: "🎤",
+          color: "#00b894",
+          hint: "مغني مصري نوبي لقبه الكينج",
+        },
+        {
+          id: 18,
+          category: "مغني مصري",
+          answer: "تامر حسني",
+          alt: [],
+          icon: "🎤",
+          color: "#e17055",
+          hint: "مغني مصري يلقب بنجم الجيل",
+        },
+        {
+          id: 19,
+          category: "مغني مصري",
+          answer: "شيرين عبد الوهاب",
+          alt: ["شيرين"],
+          icon: "🎤",
+          color: "#fd79a8",
+          hint: "مغنية مصرية اشتهرت بأغاني الحب",
+        },
+        {
+          id: 20,
+          category: "مغني مصري",
+          answer: "أنغام",
+          alt: [],
+          icon: "🎤",
+          color: "#a29bfe",
+          hint: "مغنية مصرية اشتهرت بأغنية يا واد يا تقيل",
+        },
+        {
+          id: 21,
+          category: "مغني مصري",
+          answer: "محمد حماقي",
+          alt: ["حماقي"],
+          icon: "🎤",
+          color: "#fdcb6e",
+          hint: "مغني مصري اشتهر بأغنية قلبي معاك",
+        },
+        {
+          id: 22,
+          category: "مغني مصري",
+          answer: "هاني شاكر",
+          alt: [],
+          icon: "🎤",
+          color: "#00cec9",
+          hint: "مغني مصري ورئيس نقابة الموسيقيين",
+        },
+        {
+          id: 23,
+          category: "مغني مصري",
+          answer: "رامي صبري",
+          alt: [],
+          icon: "🎤",
+          color: "#0984e3",
+          hint: "مغني مصري اشتهر بأغاني الرومانسية",
+        },
+        {
+          id: 24,
+          category: "مغني مصري",
+          answer: "إيهاب توفيق",
+          alt: ["ايهاب توفيق"],
+          icon: "🎤",
+          color: "#e17055",
+          hint: "مغني مصري اشتهر بالطرب الحديث",
+        },
+        {
+          id: 25,
+          category: "مغني مصري",
+          answer: "محمد فؤاد",
+          alt: [],
+          icon: "🎤",
+          color: "#6c5ce7",
+          hint: "مغني مصري اشتهر بأغنية يا حبيبي يا عمري",
+        },
+
+        // لاعبي كرة قدم مصريين
+        {
+          id: 26,
+          category: "لاعب مصري",
+          answer: "محمد صلاح",
+          alt: ["مو صلاح"],
+          icon: "⚽",
+          color: "#d63031",
+          hint: "لاعب كرة قدم مصري يلعب في ليفربول الإنجليزي",
+        },
+        {
+          id: 27,
+          category: "لاعب مصري",
+          answer: "محمد أبو تريكة",
+          alt: ["ابو تريكة", "تريكة"],
+          icon: "⚽",
+          color: "#e17055",
+          hint: "أسطورة كرة القدم المصرية لاعب الأهلي السابق",
+        },
+        {
+          id: 28,
+          category: "لاعب مصري",
+          answer: "محمود الخطيب",
+          alt: ["بيبو"],
+          icon: "⚽",
+          color: "#d63031",
+          hint: "رئيس النادي الأهلي المصري ولقبه بيبو",
+        },
+        {
+          id: 29,
+          category: "لاعب مصري",
+          answer: "عصام الحضري",
+          alt: ["الحضري", "السد العالي"],
+          icon: "⚽",
+          color: "#0984e3",
+          hint: "حارس مرمى مصري دخل موسوعة غينيس",
+        },
+        {
+          id: 30,
+          category: "لاعب مصري",
+          answer: "حسام حسن",
+          alt: [],
+          icon: "⚽",
+          color: "#00b894",
+          hint: "هداف منتخب مصر التاريخي",
+        },
+        {
+          id: 31,
+          category: "لاعب مصري",
+          answer: "ميدو",
+          alt: [],
+          icon: "⚽",
+          color: "#fdcb6e",
+          hint: "لاعب مصري لعب في توتنهام وأندية أوروبية عديدة",
+        },
+        {
+          id: 32,
+          category: "لاعب مصري",
+          answer: "شيكابالا",
+          alt: [],
+          icon: "⚽",
+          color: "#a29bfe",
+          hint: "لاعب الزمالك المصري صاحب المراوغات الشهيرة",
+        },
+        {
+          id: 33,
+          category: "لاعب مصري",
+          answer: "محمد النني",
+          alt: ["النني"],
+          icon: "⚽",
+          color: "#d63031",
+          hint: "لاعب مصري في آرسنال الإنجليزي",
+        },
+        {
+          id: 34,
+          category: "لاعب مصري",
+          answer: "رمضان صبحي",
+          alt: ["صبحي"],
+          icon: "⚽",
+          color: "#6c5ce7",
+          hint: "لاعب مصري شاب يلعب في الدوري المصري",
+        },
+        {
+          id: 35,
+          category: "لاعب مصري",
+          answer: "أحمد حسن",
+          alt: ["احمد حسن"],
+          icon: "⚽",
+          color: "#00cec9",
+          hint: "أكثر لاعب ظهوراً في تاريخ منتخب مصر",
+        },
+
+        // ممثلين عالميين
+        {
+          id: 36,
+          category: "ممثل عالمي",
+          answer: "توم هانكس",
+          alt: [],
+          icon: "🎬",
+          color: "#0984e3",
+          hint: "ممثل أمريكي فاز بالأوسكار مرتين وله فيلم فورست غامب",
+        },
+        {
+          id: 37,
+          category: "ممثل عالمي",
+          answer: "ليوناردو دي كابريو",
+          alt: ["دي كابريو"],
+          icon: "🎬",
+          color: "#6c5ce7",
+          hint: "ممثل أمريكي اشتهر بفيلم تيتانيك",
+        },
+        {
+          id: 38,
+          category: "ممثل عالمي",
+          answer: "براد بيت",
+          alt: [],
+          icon: "🎬",
+          color: "#e17055",
+          hint: "ممثل أمريكي كان متزوجاً من أنجلينا جولي",
+        },
+        {
+          id: 39,
+          category: "ممثل عالمي",
+          answer: "جوني ديب",
+          alt: [],
+          icon: "🎬",
+          color: "#00b894",
+          hint: "ممثل أمريكي اشتهر بدور القراصنة",
+        },
+        {
+          id: 40,
+          category: "ممثل عالمي",
+          answer: "روبرت داوني جونيور",
+          alt: ["آيرون مان"],
+          icon: "🎬",
+          color: "#d63031",
+          hint: "ممثل أمريكي جسد دور آيرون مان",
+        },
+        {
+          id: 41,
+          category: "ممثل عالمي",
+          answer: "توم كروز",
+          alt: [],
+          icon: "🎬",
+          color: "#fdcb6e",
+          hint: "ممثل أمريكي اشتهر بسلسلة مهمة مستحيلة",
+        },
+        {
+          id: 42,
+          category: "ممثل عالمي",
+          answer: "ويل سميث",
+          alt: [],
+          icon: "🎬",
+          color: "#a29bfe",
+          hint: "ممثل أمريكي صفع مقدم حفل الأوسكار",
+        },
+        {
+          id: 43,
+          category: "ممثل عالمي",
+          answer: "دينزل واشنطن",
+          alt: [],
+          icon: "🎬",
+          color: "#00cec9",
+          hint: "ممثل أمريكي أسود فاز بالأوسكار عدة مرات",
+        },
+        {
+          id: 44,
+          category: "ممثل عالمي",
+          answer: "مورجان فريمان",
+          alt: [],
+          icon: "🎬",
+          color: "#0984e3",
+          hint: "ممثل أمريكي أسود مشهور بصوته العميق",
+        },
+        {
+          id: 45,
+          category: "ممثل عالمي",
+          answer: "ذا روك",
+          alt: ["دوين جونسون"],
+          icon: "🎬",
+          color: "#e17055",
+          hint: "ممثل أمريكي كان مصارعاً ثم أصبح نجم أفلام",
+        },
+        {
+          id: 46,
+          category: "ممثل عالمي",
+          answer: "هيو جاكمان",
+          alt: ["وولفرين"],
+          icon: "🎬",
+          color: "#6c5ce7",
+          hint: "ممثل أسترالي جسد دور وولفرين في X-Men",
+        },
+        {
+          id: 47,
+          category: "ممثل عالمي",
+          answer: "أنجلينا جولي",
+          alt: [],
+          icon: "🎬",
+          color: "#fd79a8",
+          hint: "ممثلة أمريكية مشهورة بنشاطها الإنساني",
+        },
+        {
+          id: 48,
+          category: "ممثل عالمي",
+          answer: "إيما واتسون",
+          alt: ["هيرميون"],
+          icon: "🎬",
+          color: "#a29bfe",
+          hint: "ممثلة بريطانية جسدت دور هيرميون في هاري بوتر",
+        },
+        {
+          id: 49,
+          category: "ممثل عالمي",
+          answer: "سكارليت جوهانسون",
+          alt: ["بلاك ويدو"],
+          icon: "🎬",
+          color: "#d63031",
+          hint: "ممثلة أمريكية جسدت دور بلاك ويدو",
+        },
+        {
+          id: 50,
+          category: "ممثل عالمي",
+          answer: "جيم كاري",
+          alt: [],
+          icon: "🎬",
+          color: "#fdcb6e",
+          hint: "ممثل كوميدي كندي مشهور بتعابير وجهه المبالغ فيها",
+        },
+
+        // مغنيين عالميين
+        {
+          id: 51,
+          category: "مغني عالمي",
+          answer: "مايكل جاكسون",
+          alt: ["ملك البوب"],
+          icon: "🎵",
+          color: "#6c5ce7",
+          hint: "ملك البوب الراحل صاحب رقصة مونووك",
+        },
+        {
+          id: 52,
+          category: "مغني عالمي",
+          answer: "إد شيران",
+          alt: [],
+          icon: "🎵",
+          color: "#e17055",
+          hint: "مغني بريطاني أحمر الشعر صاحب أغنية Shape of You",
+        },
+        {
+          id: 53,
+          category: "مغني عالمي",
+          answer: "برونو مارس",
+          alt: [],
+          icon: "🎵",
+          color: "#fdcb6e",
+          hint: "مغني أمريكي صاحب أغنية Uptown Funk",
+        },
+        {
+          id: 54,
+          category: "مغني عالمي",
+          answer: "جاستن بيبر",
+          alt: [],
+          icon: "🎵",
+          color: "#00cec9",
+          hint: "مغني كندي بدأ مسيرته وهو صغير",
+        },
+        {
+          id: 55,
+          category: "مغني عالمي",
+          answer: "دريك",
+          alt: [],
+          icon: "🎵",
+          color: "#d63031",
+          hint: "مغني راب كندي من تورنتو",
+        },
+        {
+          id: 56,
+          category: "مغني عالمي",
+          answer: "إمينيم",
+          alt: [],
+          icon: "🎵",
+          color: "#636e72",
+          hint: "مغني راب أمريكي أبيض من ديترويت",
+        },
+        {
+          id: 57,
+          category: "مغني عالمي",
+          answer: "بيلي آيليش",
+          alt: [],
+          icon: "🎵",
+          color: "#00b894",
+          hint: "مغنية أمريكية شابة فازت بجوائز غرامي",
+        },
+        {
+          id: 58,
+          category: "مغني عالمي",
+          answer: "أريانا غراندي",
+          alt: [],
+          icon: "🎵",
+          color: "#fd79a8",
+          hint: "مغنية أمريكية ذات شعر طويل مربوط",
+        },
+        {
+          id: 59,
+          category: "مغني عالمي",
+          answer: "تايلور سويفت",
+          alt: [],
+          icon: "🎵",
+          color: "#e17055",
+          hint: "مغنية أمريكية مشهورة بأغاني الحب",
+        },
+        {
+          id: 60,
+          category: "مغني عالمي",
+          answer: "بيونسيه",
+          alt: [],
+          icon: "🎵",
+          color: "#fdcb6e",
+          hint: "مغنية أمريكية زوجة المغني جاي زي",
+        },
+        {
+          id: 61,
+          category: "مغني عالمي",
+          answer: "شاكيرا",
+          alt: [],
+          icon: "🎵",
+          color: "#a29bfe",
+          hint: "مغنية كولومبية مشهورة برقصة البطن",
+        },
+        {
+          id: 62,
+          category: "مغني عالمي",
+          answer: "جينيفر لوبيز",
+          alt: ["جي لو"],
+          icon: "🎵",
+          color: "#d63031",
+          hint: "مغنية أمريكية لاتينية ممثلة أيضاً",
+        },
+        {
+          id: 63,
+          category: "مغني عالمي",
+          answer: "سيلينا غوميز",
+          alt: [],
+          icon: "🎵",
+          color: "#fd79a8",
+          hint: "مغنية أمريكية بدأت مسيرتها في ديزني",
+        },
+        {
+          id: 64,
+          category: "مغني عالمي",
+          answer: "ليدي غاغا",
+          alt: [],
+          icon: "🎵",
+          color: "#6c5ce7",
+          hint: "مغنية أمريكية مشهورة بأزيائها الغريبة",
+        },
+        {
+          id: 65,
+          category: "مغني عالمي",
+          answer: "ذا ويكند",
+          alt: [],
+          icon: "🎵",
+          color: "#00cec9",
+          hint: "مغني كندي إثيوبي الأصل صاحب أغنية Blinding Lights",
+        },
+
+        // لاعبي كرة قدم عالميين
+        {
+          id: 66,
+          category: "لاعب عالمي",
+          answer: "كريستيانو رونالدو",
+          alt: ["رونالدو", "CR7"],
+          icon: "⚽",
+          color: "#d63031",
+          hint: "لاعب برتغالي يلقب بـ CR7 فاز بكأس أوروبا 2016",
+        },
+        {
+          id: 67,
+          category: "لاعب عالمي",
+          answer: "ليونيل ميسي",
+          alt: ["ميسي"],
+          icon: "⚽",
+          color: "#a29bfe",
+          hint: "لاعب أرجنتيني فاز بكأس العالم 2022",
+        },
+        {
+          id: 68,
+          category: "لاعب عالمي",
+          answer: "نيمار",
+          alt: [],
+          icon: "⚽",
+          color: "#fdcb6e",
+          hint: "لاعب برازيلي مشهور بمراوغاته",
+        },
+        {
+          id: 69,
+          category: "لاعب عالمي",
+          answer: "كيليان مبابي",
+          alt: ["مبابي"],
+          icon: "⚽",
+          color: "#0984e3",
+          hint: "لاعب فرنسي شاب يلعب في ريال مدريد",
+        },
+        {
+          id: 70,
+          category: "لاعب عالمي",
+          answer: "إيرلينغ هالاند",
+          alt: ["هالاند"],
+          icon: "⚽",
+          color: "#00b894",
+          hint: "لاعب نرويجي يلعب في مانشستر سيتي",
+        },
+        {
+          id: 71,
+          category: "لاعب عالمي",
+          answer: "ديفيد بيكهام",
+          alt: ["بيكهام"],
+          icon: "⚽",
+          color: "#6c5ce7",
+          hint: "لاعب إنجليزي سابق مشهور بضرباته الحرة",
+        },
+        {
+          id: 72,
+          category: "لاعب عالمي",
+          answer: "رونالدينيو",
+          alt: [],
+          icon: "⚽",
+          color: "#fdcb6e",
+          hint: "لاعب برازيلي سابق مشهور بمرحه داخل الملعب",
+        },
+        {
+          id: 73,
+          category: "لاعب عالمي",
+          answer: "زين الدين زيدان",
+          alt: ["زيدان"],
+          icon: "⚽",
+          color: "#d63031",
+          hint: "لاعب فرنسي جزائري الأصل مشهور بضربة الرأس في النهائي",
+        },
+        {
+          id: 74,
+          category: "لاعب عالمي",
+          answer: "بيليه",
+          alt: [],
+          icon: "⚽",
+          color: "#fdcb6e",
+          hint: "أسطورة كرة القدم البرازيلية والعالمية",
+        },
+        {
+          id: 75,
+          category: "لاعب عالمي",
+          answer: "دييغو مارادونا",
+          alt: ["مارادونا"],
+          icon: "⚽",
+          color: "#0984e3",
+          hint: "أسطورة كرة القدم الأرجنتينية صاحب يد الله",
+        },
+        {
+          id: 76,
+          category: "لاعب عالمي",
+          answer: "لوكا مودريتش",
+          alt: ["مودريتش"],
+          icon: "⚽",
+          color: "#00cec9",
+          hint: "لاعب كرواتي في ريال مدريد فاز بالكرة الذهبية",
+        },
+        {
+          id: 77,
+          category: "لاعب عالمي",
+          answer: "كيفين دي بروين",
+          alt: ["دي بروين"],
+          icon: "⚽",
+          color: "#6c5ce7",
+          hint: "لاعب بلجيكي يلعب في مانشستر سيتي",
+        },
+        {
+          id: 78,
+          category: "لاعب عالمي",
+          answer: "ساديو ماني",
+          alt: ["ماني"],
+          icon: "⚽",
+          color: "#fdcb6e",
+          hint: "لاعب سنغالي سابق في ليفربول",
+        },
+        {
+          id: 79,
+          category: "لاعب عالمي",
+          answer: "روبرت ليفاندوفسكي",
+          alt: ["ليفاندوفسكي"],
+          icon: "⚽",
+          color: "#d63031",
+          hint: "لاعب بولندي يلعب في برشلونة",
+        },
+        {
+          id: 80,
+          category: "لاعب عالمي",
+          answer: "زلاتان إبراهيموفيتش",
+          alt: ["زلاتان"],
+          icon: "⚽",
+          color: "#a29bfe",
+          hint: "لاعب سويدي كبير مشهور بغروره",
+        },
+
+        // حيوانات
+        {
+          id: 81,
+          category: "حيوان",
+          answer: "أسد",
+          alt: ["الأسد"],
+          icon: "🦁",
+          color: "#e17055",
+          hint: "ملك الغابة يعيش في أفريقيا",
+        },
+        {
+          id: 82,
+          category: "حيوان",
+          answer: "نمر",
+          alt: ["الببر", "النمر"],
+          icon: "🐯",
+          color: "#e17055",
+          hint: "أكبر القطط المفترسة ذو مخطط أسود",
+        },
+        {
+          id: 83,
+          category: "حيوان",
+          answer: "فيل",
+          alt: ["الفيل"],
+          icon: "🐘",
+          color: "#636e72",
+          hint: "أكبر الحيوانات البرية يتميز بخرطومه الطويل",
+        },
+        {
+          id: 84,
+          category: "حيوان",
+          answer: "زرافة",
+          alt: ["الزرافة"],
+          icon: "🦒",
+          color: "#fdcb6e",
+          hint: "أطول الحيوانات على وجه الأرض",
+        },
+        {
+          id: 85,
+          category: "حيوان",
+          answer: "حصان",
+          alt: ["الحصان"],
+          icon: "🐎",
+          color: "#a29bfe",
+          hint: "حيوان سريع يستخدم في السباقات",
+        },
+        {
+          id: 86,
+          category: "حيوان",
+          answer: "قط",
+          alt: ["القط", "هرة"],
+          icon: "🐱",
+          color: "#fdcb6e",
+          hint: "حيوان أليف يحب اللعب والنوم",
+        },
+        {
+          id: 87,
+          category: "حيوان",
+          answer: "كلب",
+          alt: ["الكلب"],
+          icon: "🐕",
+          color: "#e17055",
+          hint: "أفضل صديق للإنسان",
+        },
+        {
+          id: 88,
+          category: "حيوان",
+          answer: "دب قطبي",
+          alt: ["الدب الأبيض"],
+          icon: "🐻‍❄️",
+          color: "#74b9ff",
+          hint: "حيوان أبيض يعيش في القطب الشمالي",
+        },
+        {
+          id: 89,
+          category: "حيوان",
+          answer: "باندا",
+          alt: ["الباندا"],
+          icon: "🐼",
+          color: "#636e72",
+          hint: "حيوان صيني أبيض وأسود يأكل الخيزران",
+        },
+        {
+          id: 90,
+          category: "حيوان",
+          answer: "دولفين",
+          alt: ["الدولفين"],
+          icon: "🐬",
+          color: "#0984e3",
+          hint: "حيوان بحري ذكي يحب اللعب",
+        },
+        {
+          id: 91,
+          category: "حيوان",
+          answer: "قرش",
+          alt: ["القرش"],
+          icon: "🦈",
+          color: "#636e72",
+          hint: "أخطر سمكة في المحيط",
+        },
+        {
+          id: 92,
+          category: "حيوان",
+          answer: "بطريق",
+          alt: ["البطريق"],
+          icon: "🐧",
+          color: "#2d3436",
+          hint: "طائر لا يطير يعيش في القطب الجنوبي",
+        },
+        {
+          id: 93,
+          category: "حيوان",
+          answer: "كنغر",
+          alt: ["الكنغر"],
+          icon: "🦘",
+          color: "#e17055",
+          hint: "حيوان أسترالي يقفز ويحمل صغيره في جيب",
+        },
+        {
+          id: 94,
+          category: "حيوان",
+          answer: "تمساح",
+          alt: ["التمساح"],
+          icon: "🐊",
+          color: "#00b894",
+          hint: "زواحف ضخمة تعيش في الأنهار والمستنقعات",
+        },
+        {
+          id: 95,
+          category: "حيوان",
+          answer: "حوت",
+          alt: ["الحوت"],
+          icon: "🐋",
+          color: "#0984e3",
+          hint: "أكبر كائن حي على وجه الأرض",
+        },
+        {
+          id: 96,
+          category: "حيوان",
+          answer: "أرنب",
+          alt: ["الأرنب"],
+          icon: "🐰",
+          color: "#fd79a8",
+          hint: "حيوان أبيض صغير بآذان طويلة",
+        },
+        {
+          id: 97,
+          category: "حيوان",
+          answer: "نسر",
+          alt: ["النسر"],
+          icon: "🦅",
+          color: "#e17055",
+          hint: "أقوى الطيور وملك السماء",
+        },
+        {
+          id: 98,
+          category: "حيوان",
+          answer: "جمل",
+          alt: ["الجمل"],
+          icon: "🐪",
+          color: "#fdcb6e",
+          hint: "سفينة الصحراء يمكنه الصبر على العطش طويلاً",
+        },
+        {
+          id: 99,
+          category: "حيوان",
+          answer: "فهد",
+          alt: ["الفهد"],
+          icon: "🐆",
+          color: "#fdcb6e",
+          hint: "أسرع حيوان بري على وجه الأرض",
+        },
+        {
+          id: 100,
+          category: "حيوان",
+          answer: "حمار وحشي",
+          alt: ["الحمار الوحشي"],
+          icon: "🦓",
+          color: "#2d3436",
+          hint: "حيوان أفريقي ذو خطوط بالأبيض والأسود",
+        },
+        {
+          id: 101,
+          category: "حيوان",
+          answer: "ببغاء",
+          alt: ["الببغاء"],
+          icon: "🦜",
+          color: "#00b894",
+          hint: "طائر ملون يستطيع تقليد الكلام",
+        },
+        {
+          id: 102,
+          category: "حيوان",
+          answer: "كوالا",
+          alt: ["الكوالا"],
+          icon: "🐨",
+          color: "#636e72",
+          hint: "حيوان أسترالي يتعلق بالأشجار ويأكل أوراق الأوكالبتوس",
+        },
+        {
+          id: 103,
+          category: "حيوان",
+          answer: "غوريلا",
+          alt: ["الغوريلا"],
+          icon: "🦍",
+          color: "#2d3436",
+          hint: "أكبر القردة وأذكاها",
+        },
+        {
+          id: 104,
+          category: "حيوان",
+          answer: "وحيد القرن",
+          alt: ["الرينو", "الكركدن"],
+          icon: "🦏",
+          color: "#636e72",
+          hint: "حيوان ضخم له قرن على أنفه",
+        },
+        {
+          id: 105,
+          category: "حيوان",
+          answer: "حمار وحشي",
+          alt: [],
+          icon: "🦓",
+          color: "#2d3436",
+          hint: "يشبه الحمار لكن بخطوط بالأبيض والأسود",
+        },
+
+        // نباتات
+        {
+          id: 106,
+          category: "نبات",
+          answer: "وردة",
+          alt: ["الوردة"],
+          icon: "🌹",
+          color: "#d63031",
+          hint: "زهرة حمراء رمز الحب والرومانسية",
+        },
+        {
+          id: 107,
+          category: "نبات",
+          answer: "عباد الشمس",
+          alt: ["دوار الشمس"],
+          icon: "🌻",
+          color: "#fdcb6e",
+          hint: "زهرة صفراء كبيرة تتجه نحو الشمس",
+        },
+        {
+          id: 108,
+          category: "نبات",
+          answer: "توليب",
+          alt: ["الزنبق"],
+          icon: "🌷",
+          color: "#fd79a8",
+          hint: "زهرة هولندية مشهورة تأتي بألوان متعددة",
+        },
+        {
+          id: 109,
+          category: "نبات",
+          answer: "صبار",
+          alt: ["الصبار"],
+          icon: "🌵",
+          color: "#00b894",
+          hint: "نبات يعيش في الصحراء يخزن الماء",
+        },
+        {
+          id: 110,
+          category: "نبات",
+          answer: "نخلة",
+          alt: ["النخلة"],
+          icon: "🌴",
+          color: "#00b894",
+          hint: "شجرة استوائية يمكن الجلوس في ظلها على الشاطئ",
+        },
+        {
+          id: 111,
+          category: "نبات",
+          answer: "ياسمين",
+          alt: ["الياسمين"],
+          icon: "🌸",
+          color: "#fd79a8",
+          hint: "زهرة بيضاء عطرة شهيرة في مصر وسوريا",
+        },
+        {
+          id: 112,
+          category: "نبات",
+          answer: "خزامى",
+          alt: ["اللافندر"],
+          icon: "💜",
+          color: "#a29bfe",
+          hint: "نبات بنفسجي اللون عطري الرائحة",
+        },
+        {
+          id: 113,
+          category: "نبات",
+          answer: "أوركيد",
+          alt: ["الأوركيد"],
+          icon: "🌺",
+          color: "#fd79a8",
+          hint: "زهرة فاخرة تعتبر من أجمل الزهور",
+        },
+        {
+          id: 114,
+          category: "نبات",
+          answer: "ألوي فيرا",
+          alt: ["الصبار الطبي"],
+          icon: "🌿",
+          color: "#00b894",
+          hint: "نبات طبي يستخدم للعناية بالبشرة والشعر",
+        },
+        {
+          id: 115,
+          category: "نبات",
+          answer: "نعناع",
+          alt: ["النعناع"],
+          icon: "🌿",
+          color: "#00b894",
+          hint: "نبات أخضر عطري يستخدم في الشاي",
+        },
+        {
+          id: 116,
+          category: "نبات",
+          answer: "فراولة",
+          alt: ["الفراولة"],
+          icon: "🍓",
+          color: "#d63031",
+          hint: "فاكهة حمراء صغيرة حلوة المذاق",
+        },
+        {
+          id: 117,
+          category: "نبات",
+          answer: "عنب",
+          alt: ["العنب"],
+          icon: "🍇",
+          color: "#a29bfe",
+          hint: "فاكهة بنفسجية أو خضراء تنمو في عناقيد",
+        },
+        {
+          id: 118,
+          category: "نبات",
+          answer: "موز",
+          alt: ["الموز"],
+          icon: "🍌",
+          color: "#fdcb6e",
+          hint: "فاكهة صفراء استوائية مطولة الشكل",
+        },
+        {
+          id: 119,
+          category: "نبات",
+          answer: "تفاح",
+          alt: ["التفاح"],
+          icon: "🍎",
+          color: "#d63031",
+          hint: "فاكهة حمراء أو خضراء سقطت على رأس نيوتن",
+        },
+        {
+          id: 120,
+          category: "نبات",
+          answer: "برتقال",
+          alt: ["البرتقال"],
+          icon: "🍊",
+          color: "#e17055",
+          hint: "فاكهة برتقالية اللون غنية بفيتامين C",
+        },
+
+        // معالم سياحية
+        {
+          id: 121,
+          category: "معلم سياحي",
+          answer: "الأهرامات",
+          alt: ["أهرامات الجيزة"],
+          icon: "🏛️",
+          color: "#fdcb6e",
+          hint: "من عجائب الدنيا السبع موجود في مصر",
+        },
+        {
+          id: 122,
+          category: "معلم سياحي",
+          answer: "برج إيفل",
+          alt: ["إيفل"],
+          icon: "🗼",
+          color: "#636e72",
+          hint: "برج حديدي مشهور في فرنسا",
+        },
+        {
+          id: 123,
+          category: "معلم سياحي",
+          answer: "تمثال الحرية",
+          alt: [],
+          icon: "🗽",
+          color: "#00b894",
+          hint: "تمثال شهير في نيويورك هدية من فرنسا",
+        },
+        {
+          id: 124,
+          category: "معلم سياحي",
+          answer: "برج خليفة",
+          alt: [],
+          icon: "🏙️",
+          color: "#0984e3",
+          hint: "أطول برج في العالم موجود في دبي",
+        },
+        {
+          id: 125,
+          category: "معلم سياحي",
+          answer: "تاج محل",
+          alt: [],
+          icon: "🕌",
+          color: "#ffffff",
+          hint: "مبنى رخامي أبيض في الهند بناه شاه جيهان لزوجته",
+        },
+        {
+          id: 126,
+          category: "معلم سياحي",
+          answer: "الكعبة المشرفة",
+          alt: ["الكعبة"],
+          icon: "🕋",
+          color: "#2d3436",
+          hint: "أقدس مكان في الإسلام في مكة المكرمة",
+        },
+        {
+          id: 127,
+          category: "معلم سياحي",
+          answer: "تمثال المسيح",
+          alt: [],
+          icon: "✝️",
+          color: "#e17055",
+          hint: "تمثال ضخم في ريو دي جانيرو بالبرازيل",
+        },
+        {
+          id: 128,
+          category: "معلم سياحي",
+          answer: "أبو سمبل",
+          alt: [],
+          icon: "🏛️",
+          color: "#fdcb6e",
+          hint: "معبد فرعوني في أسوان بمصر",
+        },
+        {
+          id: 129,
+          category: "معلم سياحي",
+          answer: "الأقصر",
+          alt: [],
+          icon: "🏛️",
+          color: "#e17055",
+          hint: "مدينة مصرية تحتوي على أكبر متحف مفتوح في العالم",
+        },
+        {
+          id: 130,
+          category: "معلم سياحي",
+          answer: "البتراء",
+          alt: [],
+          icon: "🏺",
+          color: "#e17055",
+          hint: "مدينة منحوتة في الصخر في الأردن",
+        },
+      ];
+
+      // ========== متغيرات اللعبة ==========
+      let teams = [];
+      let currentTeamIdx = 0;
+      let currentQuestion = null;
+      let usedIds = [];
+      let timeLeft = 90;
+      let timerInt = null;
+      let round = 1;
+      let revealedLetters = [];
+      const COLORS = [
+        "#6c5ce7",
+        "#00b894",
+        "#e17055",
+        "#0984e3",
+        "#fdcb6e",
+        "#a29bfe",
+        "#fd79a8",
+        "#55efc4",
+      ];
+
+      // ========== إدارة الشاشات ==========
+      function showScreen(id) {
+        document
+          .querySelectorAll(".screen")
+          .forEach((s) => s.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+        window.scrollTo(0, 0);
+      }
+
+      // ========== إدارة الفرق ==========
+      function addTeam() {
+        const nameEl = document.getElementById("team-name-input");
+        const sizeEl = document.getElementById("team-size-input");
+        const name = nameEl.value.trim();
+        const size = parseInt(sizeEl.value);
+
+        if (!name) {
+          showToast("❌ أدخل اسم الفريق", "error");
+          return;
+        }
+        if (teams.some((t) => t.name.toLowerCase() === name.toLowerCase())) {
+          showToast("⚠️ هذا الاسم موجود مسبقاً", "warning");
+          return;
+        }
+
+        teams.push({
+          id: Date.now(),
+          name,
+          size,
+          score: 0,
+          color: COLORS[teams.length % COLORS.length],
+        });
+
+        nameEl.value = "";
+        renderTeams();
+        updateBtn();
+        showToast(`✅ تم إضافة "${name}"`, "success");
+      }
+
+      function removeTeam(id) {
+        teams = teams.filter((t) => t.id !== id);
+        renderTeams();
+        updateBtn();
+      }
+
+      function renderTeams() {
+        const list = document.getElementById("teams-list");
+        list.innerHTML = "";
+        teams.forEach((team) => {
+          const div = document.createElement("div");
+          div.className = "team-item";
+          div.innerHTML = `
+            <div class="team-item-info">
+                <h3 style="color:${team.color}">● ${team.name}</h3>
+                <p>👥 ${team.size} لاعبين</p>
+            </div>
+            <button class="delete-btn" onclick="removeTeam(${team.id})">🗑️</button>
+        `;
+          list.appendChild(div);
+        });
+      }
+
+      function updateBtn() {
+        const btn = document.getElementById("start-btn");
+        document.getElementById("team-count").textContent = teams.length;
+        btn.disabled = teams.length < 2;
+      }
+
+      // ========== بدء اللعبة ==========
+      function startGame() {
+        if (teams.length < 2) {
+          showToast("❌ يجب إضافة فريقين على الأقل", "error");
+          return;
+        }
+        teams.forEach((t) => (t.score = 0));
+        currentTeamIdx = 0;
+        usedIds = [];
+        round = 1;
+        showScreen("game-screen");
+        nextQuestion();
+      }
+
+      // ========== اختيار سؤال عشوائي ==========
+      function nextQuestion() {
+        let available = QUESTIONS.filter((q) => !usedIds.includes(q.id));
+        if (available.length === 0) {
+          usedIds = [];
+          available = [...QUESTIONS];
+        }
+        currentQuestion =
+          available[Math.floor(Math.random() * available.length)];
+        usedIds.push(currentQuestion.id);
+        revealedLetters = [];
+        renderQuestion();
+        updateGameUI();
+        startTimer();
+      }
+
+      // ========== عرض السؤال ==========
+      function renderQuestion() {
+        // تحديث الفئة
+        document.getElementById("img-category").textContent =
+          currentQuestion.category;
+
+        // عرض الأيقونة والتلميح
+        const placeholder = document.getElementById("img-placeholder");
+        const gameImg = document.getElementById("game-image");
+
+        placeholder.style.display = "flex";
+        placeholder.style.background = currentQuestion.color + "22";
+        gameImg.style.display = "none";
+
+        document.getElementById("category-icon").textContent =
+          currentQuestion.icon;
+        document.getElementById("placeholder-text").textContent =
+          currentQuestion.hint;
+
+        // عدد الحروف
+        document.getElementById("letter-count").textContent =
+          currentQuestion.answer.length;
+
+        // حقل الإجابة
+        const input = document.getElementById("answer-input");
+        input.value = "";
+        input.className = "answer-input";
+
+        // بناء تلميح الحروف
+        buildHints();
+      }
+
+      function buildHints() {
+        const container = document.getElementById("hint-dots");
+        container.innerHTML = "";
+        currentQuestion.answer.split("").forEach((char, idx) => {
+          const dot = document.createElement("div");
+          if (char === " ") {
+            dot.className = "hint-dot space";
+          } else {
+            dot.className = "hint-dot";
+            dot.id = `d${idx}`;
+            dot.textContent = "?";
+          }
+          container.appendChild(dot);
+        });
+      }
+
+      function revealLetter() {
+        const chars = currentQuestion.answer.split("");
+        const hidden = chars
+          .map((c, i) => i)
+          .filter((i) => chars[i] !== " " && !revealedLetters.includes(i));
+        if (hidden.length === 0) {
+          showToast("تم كشف كل الحروف!", "info");
+          return;
+        }
+        const idx = hidden[Math.floor(Math.random() * hidden.length)];
+        revealedLetters.push(idx);
+        const dot = document.getElementById(`d${idx}`);
+        if (dot) {
+          dot.textContent = chars[idx];
+          dot.classList.add("revealed");
+        }
+        showToast("💡 تم كشف حرف", "info");
+      }
+
+      // ========== التحقق من الإجابة ==========
+      function checkAnswer() {
+        const input = document.getElementById("answer-input");
+        const userAns = input.value.trim().toLowerCase();
+        if (!userAns) {
+          showToast("⚠️ اكتب إجابتك أولاً", "warning");
+          return;
+        }
+
+        const correct =
+          currentQuestion.answer.toLowerCase() === userAns ||
+          currentQuestion.alt.some((a) => a.toLowerCase() === userAns);
+
+        if (correct) {
+          input.className = "answer-input correct";
+          stopTimer();
+          teams[currentTeamIdx].score++;
+          showToast(`🎉 صحيح! الإجابة: "${currentQuestion.answer}"`, "success");
+
+          if (teams[currentTeamIdx].score >= 10) {
+            setTimeout(endGame, 1500);
+          } else {
+            setTimeout(() => {
+              nextTeam();
+              nextQuestion();
+            }, 1800);
+          }
+        } else {
+          input.className = "answer-input wrong";
+          showToast("❌ خطأ، حاول مرة أخرى!", "error");
+          setTimeout(() => {
+            input.className = "answer-input";
+            input.value = "";
+            input.focus();
+          }, 1000);
+        }
+      }
+
+      function skipQuestion() {
+        showModal(
+          "⏭️ تخطي السؤال؟",
+          `الإجابة الصحيحة كانت:\n"${currentQuestion.answer}"`,
+          [
+            {
+              text: "✅ متابعة",
+              cls: "btn-primary",
+              fn: () => {
+                closeModal();
+                stopTimer();
+                nextTeam();
+                nextQuestion();
+              },
+            },
+            { text: "❌ إلغاء", cls: "btn-secondary", fn: closeModal },
+          ],
+        );
+      }
+
+      // ========== تبديل الفرق ==========
+      function nextTeam() {
+        currentTeamIdx = (currentTeamIdx + 1) % teams.length;
+        round++;
+      }
+
+      // ========== المؤقت ==========
+      function startTimer() {
+        stopTimer();
+        timeLeft = 90;
+        updateTimer();
+        timerInt = setInterval(() => {
+          timeLeft--;
+          updateTimer();
+          if (timeLeft <= 0) {
+            stopTimer();
+            showModal(
+              "⏰ انتهى الوقت!",
+              `الوقت انتهى لفريق "${teams[currentTeamIdx].name}"\nالإجابة كانت: "${currentQuestion.answer}"`,
+              [
+                {
+                  text: "▶️ التالي",
+                  cls: "btn-primary",
+                  fn: () => {
+                    closeModal();
+                    nextTeam();
+                    nextQuestion();
+                  },
+                },
+              ],
+            );
+          }
+        }, 1000);
+      }
+
+      function stopTimer() {
+        if (timerInt) {
+          clearInterval(timerInt);
+          timerInt = null;
+        }
+      }
+
+      function updateTimer() {
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        const text = `${m}:${s.toString().padStart(2, "0")}`;
+        const el = document.getElementById("timer");
+        const timeText = document.getElementById("time-text");
+        const fill = document.getElementById("progress-fill");
+
+        el.textContent = text;
+        if (timeText) timeText.textContent = text;
+        if (fill) fill.style.width = `${(timeLeft / 90) * 100}%`;
+
+        el.className = "timer-display";
+        if (timeLeft <= 10) el.classList.add("danger");
+        else if (timeLeft <= 30) el.classList.add("warning");
+      }
+
+      // ========== تحديث واجهة اللعبة ==========
+      function updateGameUI() {
+        const team = teams[currentTeamIdx];
+        document.getElementById("current-team-name").textContent = team.name;
+        document.getElementById("current-score").textContent = team.score;
+        document.getElementById("round-num").textContent = round;
+        document.getElementById("guesser-name").textContent =
+          `لاعب ${(round % team.size) + 1}`;
+
+        const board = document.getElementById("scoreboard");
+        board.innerHTML = "";
+        teams.forEach((t, i) => {
+          const badge = document.createElement("div");
+          badge.className = `score-badge ${i === currentTeamIdx ? "active" : ""}`;
+          badge.style.setProperty("--active-color", t.color);
+          if (i === currentTeamIdx) {
+            badge.style.borderColor = t.color;
+            badge.style.color = t.color;
+          }
+          badge.innerHTML = `<span style="color:${t.color}">●</span> ${t.name}: <strong>${t.score}</strong>`;
+          board.appendChild(badge);
+        });
+      }
+
+      // ========== نهاية اللعبة ==========
+      function endGame() {
+        stopTimer();
+        const sorted = [...teams].sort((a, b) => b.score - a.score);
+        const winner = sorted[0];
+
+        document.getElementById("winner-name").textContent =
+          `🏆 ${winner.name}`;
+        document.getElementById("winner-score").textContent = winner.score;
+
+        const fb = document.getElementById("final-scoreboard");
+        fb.innerHTML = "";
+        sorted.forEach((t, i) => {
+          const row = document.createElement("div");
+          row.className = `final-row ${i === 0 ? "winner" : ""}`;
+          row.innerHTML = `
+            <div class="rank-num" style="background:${t.color}">${i + 1}</div>
+            <div style="flex:1; text-align:right; font-size:18px; font-weight:bold;">${t.name}</div>
+            <div style="font-size:22px; font-weight:900; color:var(--warning);">${t.score} نقطة</div>
+        `;
+          fb.appendChild(row);
+        });
+
+        showScreen("results-screen");
+        launchConfetti();
+      }
+
+      function restartGame() {
+        teams.forEach((t) => (t.score = 0));
+        currentTeamIdx = 0;
+        usedIds = [];
+        round = 1;
+        showScreen("game-screen");
+        nextQuestion();
+      }
+
+      function newGame() {
+        teams = [];
+        showScreen("home-screen");
+        renderTeams();
+        updateBtn();
+      }
+
+      // ========== الكونفيتي ==========
+      function launchConfetti() {
+        const container = document.getElementById("confetti");
+        container.innerHTML = "";
+        const colors = [
+          "#ff0",
+          "#f0f",
+          "#0ff",
+          "#f00",
+          "#0f0",
+          "#00f",
+          "#f80",
+          "#fd79a8",
+        ];
+        for (let i = 0; i < 120; i++) {
+          const p = document.createElement("div");
+          p.className = "confetti-piece";
+          const size = Math.random() * 12 + 6;
+          p.style.cssText = `
+            left: ${Math.random() * 100}%;
+            background: ${colors[Math.floor(Math.random() * colors.length)]};
+            width: ${size}px;
+            height: ${size}px;
+            border-radius: ${Math.random() > 0.5 ? "50%" : "2px"};
+            animation: fall ${Math.random() * 2 + 2}s linear ${Math.random() * 2}s forwards;
+        `;
+          container.appendChild(p);
+        }
+      }
+
+      // ========== التوستر ==========
+      function showToast(msg, type = "info") {
+        document.querySelectorAll(".toast").forEach((t) => t.remove());
+        const toast = document.createElement("div");
+        toast.className = `toast ${type}`;
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2800);
+      }
+
+      // ========== النافذة المنبثقة ==========
+      function showModal(title, msg, buttons) {
+        document.getElementById("modal-title").textContent = title;
+        document.getElementById("modal-msg").textContent = msg;
+        const btns = document.getElementById("modal-btns");
+        btns.innerHTML = "";
+        buttons.forEach((b) => {
+          const el = document.createElement("button");
+          el.className = `btn ${b.cls}`;
+          el.textContent = b.text;
+          el.onclick = b.fn;
+          btns.appendChild(el);
+        });
+        document.getElementById("modal-overlay").classList.add("show");
+      }
+
+      function closeModal() {
+        document.getElementById("modal-overlay").classList.remove("show");
+      }
+
+      // تهيئة
+      updateBtn();
+    </script>
+  </body>
+</html>
